@@ -3,7 +3,6 @@
 package uring
 
 import (
-	"github.com/libp2p/go-sockaddr"
 	sockaddrnet "github.com/libp2p/go-sockaddr/net"
 	"golang.org/x/sys/unix"
 	"net"
@@ -58,7 +57,7 @@ const (
 	linkAtCode
 )
 
-//NopOp - do not perform any I/O. This is useful for testing the performance of the io_uring implementation itself.
+// NopOp - do not perform any I/O. This is useful for testing the performance of the io_uring implementation itself.
 type NopOp struct {
 }
 
@@ -74,7 +73,7 @@ func (op *NopOp) Code() OpCode {
 	return NopCode
 }
 
-//ReadVOp vectored read operation, similar to preadv2(2).
+// ReadVOp vectored read operation, similar to preadv2(2).
 type ReadVOp struct {
 	FD     uintptr
 	Size   int64
@@ -82,7 +81,7 @@ type ReadVOp struct {
 	IOVecs []syscall.Iovec
 }
 
-//ReadV vectored read operation, similar to preadv2(2).
+// ReadV vectored read operation, similar to preadv2(2).
 func ReadV(file *os.File, vectors [][]byte, offset uint64) *ReadVOp {
 	buffs := make([]syscall.Iovec, len(vectors))
 	for i, v := range vectors {
@@ -103,15 +102,15 @@ func (op *ReadVOp) Code() OpCode {
 	return ReadVCode
 }
 
-//WriteVOp vectored write operation, similar to pwritev2(2).
+// WriteVOp vectored write operation, similar to pwritev2(2).
 type WriteVOp struct {
 	FD     uintptr
 	IOVecs []syscall.Iovec
 	Offset uint64
 }
 
-//WriteV vectored writes bytes to file. Write starts from offset.
-//If the file is not seekable, offset must be set to zero.
+// WriteV vectored writes bytes to file. Write starts from offset.
+// If the file is not seekable, offset must be set to zero.
 func WriteV(file *os.File, bytes [][]byte, offset uint64) *WriteVOp {
 	buffs := make([]syscall.Iovec, len(bytes))
 	for i := range bytes {
@@ -130,12 +129,12 @@ func (op *WriteVOp) Code() OpCode {
 	return WriteVCode
 }
 
-//TimeoutOp timeout command.
+// TimeoutOp timeout command.
 type TimeoutOp struct {
 	dur time.Duration
 }
 
-//Timeout - timeout operation.
+// Timeout - timeout operation.
 func Timeout(duration time.Duration) *TimeoutOp {
 	return &TimeoutOp{
 		dur: duration,
@@ -151,7 +150,7 @@ func (op *TimeoutOp) Code() OpCode {
 	return TimeoutCode
 }
 
-//AcceptOp accept command.
+// AcceptOp accept command.
 type AcceptOp struct {
 	fd    uintptr
 	flags uint32
@@ -159,7 +158,7 @@ type AcceptOp struct {
 	len   uint32
 }
 
-//Accept - accept operation.
+// Accept - accept operation.
 func Accept(fd uintptr, flags uint32) *AcceptOp {
 	return &AcceptOp{
 		addr:  &unix.RawSockaddrAny{},
@@ -195,13 +194,13 @@ func (op *AcceptOp) AddrLen() uint32 {
 	return op.len
 }
 
-//CancelOp attempt to cancel an already issued request.
+// CancelOp attempt to cancel an already issued request.
 type CancelOp struct {
 	flags          uint32
 	targetUserData uint64
 }
 
-//Cancel create CancelOp. Put in targetUserData value of user_data field of the request that should be cancelled.
+// Cancel create CancelOp. Put in targetUserData value of user_data field of the request that should be cancelled.
 func Cancel(targetUserData uint64, flags uint32) *CancelOp {
 	return &CancelOp{flags: flags, targetUserData: targetUserData}
 }
@@ -219,13 +218,13 @@ func (op *CancelOp) Code() OpCode {
 	return AsyncCancelCode
 }
 
-//LinkTimeoutOp IORING_OP_LINK_TIMEOUT command.
+// LinkTimeoutOp IORING_OP_LINK_TIMEOUT command.
 type LinkTimeoutOp struct {
 	dur time.Duration
 }
 
-//LinkTimeout - timeout operation for linked command.
-//Note: previous queued SQE must be queued with flag SqeIOLinkFlag.
+// LinkTimeout - timeout operation for linked command.
+// Note: previous queued SQE must be queued with flag SqeIOLinkFlag.
 func LinkTimeout(duration time.Duration) *LinkTimeoutOp {
 	return &LinkTimeoutOp{
 		dur: duration,
@@ -241,14 +240,14 @@ func (op *LinkTimeoutOp) Code() OpCode {
 	return LinkTimeoutCode
 }
 
-//RecvOp receive a message from a socket operation.
+// RecvOp receive a message from a socket operation.
 type RecvOp struct {
 	fd       uintptr
 	buff     []byte
 	msgFlags uint32
 }
 
-//Recv receive a message from a socket.
+// Recv receive a message from a socket.
 func Recv(socketFd uintptr, buff []byte, msgFlags uint32) *RecvOp {
 	return &RecvOp{
 		fd:       socketFd,
@@ -274,14 +273,14 @@ func (op *RecvOp) Code() OpCode {
 	return RecvCode
 }
 
-//SendOp send a message to a socket operation.
+// SendOp send a message to a socket operation.
 type SendOp struct {
 	fd       uintptr
 	buff     []byte
 	msgFlags uint32
 }
 
-//Send send a message to a socket.
+// Send send a message to a socket.
 func Send(socketFd uintptr, buff []byte, msgFlags uint32) *SendOp {
 	return &SendOp{
 		fd:       socketFd,
@@ -307,14 +306,14 @@ func (op *SendOp) Code() OpCode {
 	return SendCode
 }
 
-//ProvideBuffersOp .
+// ProvideBuffersOp .
 type ProvideBuffersOp struct {
 	buff     []byte
 	bufferId uint64
 	groupId  uint16
 }
 
-//ProvideBuffers .
+// ProvideBuffers .
 func ProvideBuffers(buff []byte, bufferId uint64, groupId uint16) *ProvideBuffersOp {
 	return &ProvideBuffersOp{
 		buff:     buff,
@@ -332,12 +331,12 @@ func (op *ProvideBuffersOp) Code() OpCode {
 	return ProvideBuffersCode
 }
 
-//CloseOp closes a file descriptor, equivalent of a close(2) system call.
+// CloseOp closes a file descriptor, equivalent of a close(2) system call.
 type CloseOp struct {
 	fd uintptr
 }
 
-//Close closes a file descriptor, equivalent of a close(2) system call.
+// Close closes a file descriptor, equivalent of a close(2) system call.
 func Close(fd uintptr) *CloseOp {
 	return &CloseOp{
 		fd: fd,
@@ -352,14 +351,14 @@ func (op *CloseOp) Code() OpCode {
 	return CloseCode
 }
 
-//ReadOp read operation, equivalent of a pread(2) system call.
+// ReadOp read operation, equivalent of a pread(2) system call.
 type ReadOp struct {
 	fd   uintptr
 	buff []byte
 	off  uint64
 }
 
-//Read - create read operation, equivalent of a pread(2) system call.
+// Read - create read operation, equivalent of a pread(2) system call.
 func Read(fd uintptr, buff []byte, offset uint64) *ReadOp {
 	return &ReadOp{fd: fd, buff: buff, off: offset}
 }
@@ -372,14 +371,14 @@ func (op *ReadOp) Code() OpCode {
 	return ReadCode
 }
 
-//WriteOp write operation, equivalent of a pwrite(2) system call.
+// WriteOp write operation, equivalent of a pwrite(2) system call.
 type WriteOp struct {
 	fd   uintptr
 	buff []byte
 	off  uint64
 }
 
-//Write - create write operation, equivalent of a pwrite(2) system call.
+// Write - create write operation, equivalent of a pwrite(2) system call.
 func Write(fd uintptr, buff []byte, offset uint64) *WriteOp {
 	return &WriteOp{fd: fd, buff: buff, off: offset}
 }
@@ -392,14 +391,35 @@ func (op *WriteOp) Code() OpCode {
 	return WriteCode
 }
 
-//ConnectOp connect operation, equivalent of a connect(2) system call.
+type MyConnectOp struct {
+	fd   uintptr
+	addr *net.TCPAddr
+}
+
+func MyConnect(fd uintptr, addr *net.TCPAddr) *MyConnectOp {
+
+	return &MyConnectOp{
+		fd:   fd,
+		addr: addr,
+	}
+}
+
+func (op *MyConnectOp) PrepSQE(sqe *SQEntry) {
+	sqe.fill(ConnectCode, int32(op.fd), uintptr(unsafe.Pointer(op.addr)), 0, uint64(0x10))
+}
+
+func (op *MyConnectOp) Code() OpCode {
+	return ConnectCode
+}
+
+// ConnectOp connect operation, equivalent of a connect(2) system call.
 type ConnectOp struct {
 	fd   uintptr
 	addr *sockaddrnet.RawSockaddrAny
 	len  sockaddr.Socklen
 }
 
-//Connect operation, equivalent of a connect(2) system call.
+// Connect operation, equivalent of a connect(2) system call.
 func Connect(fd uintptr, addr *net.TCPAddr) *ConnectOp {
 	sa := sockaddrnet.NetAddrToSockaddr(addr)
 	rsa, l, err := sockaddr.SockaddrToAny(sa)
